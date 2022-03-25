@@ -24,7 +24,9 @@ on/off observation (subscription of the preference change events).  This allows 
 compute the alignments and issue commands on the <code>@MainActor</code> to perform the
 <code>proxy.scrollTo(...)</code> and be sure that we have 1) the proper leading item
 and 2) the following N-1 items visible **before** passing control back to the 
-app logic.  In the View: 
+app logic.  It also helps prevent numerous <code>'Bound preference *PreferenceKey tried 
+to update multiple times per frame'</code> though some may occur on long held swiping
+gestures with selects.  In the View: 
 ```
 .onChange(of: model.selected) { v in
     model.cancelSubscription()
