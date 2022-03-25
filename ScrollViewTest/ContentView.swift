@@ -71,7 +71,6 @@ class ContentViewModel : ObservableObject {
     
     @MainActor
     func setupSubscription(_ proxy: ScrollViewProxy) {
-        print("setting subswcription")
         subscription = originPublisher.sink { [unowned self] v in
             let target = self.snap()
             withAnimation {
