@@ -71,6 +71,7 @@ class ContentViewModel : ObservableObject {
     
     @MainActor
     func setupSubscription(_ proxy: ScrollViewProxy) {
+        print("setting subswcription")
         subscription = originPublisher.sink { [unowned self] v in
             let target = self.snap()
             withAnimation {
@@ -120,6 +121,8 @@ struct ContentView: View {
                                     }
                                     try? await Task.sleep(nanoseconds: 100000000)
                                 }
+                                // one last snap for edge conditions
+                                await model.doScrollSnap(proxy)
                                 await model.setupSubscription(proxy)
                             }
                         }
