@@ -52,7 +52,9 @@ class ContentViewModel : ObservableObject {
     @MainActor
     func doScrollSnap(_ proxy: ScrollViewProxy) async -> Bool {
         let snapTo = getLeading()
-        proxy.scrollTo(snapTo, anchor: .leading)
+        withAnimation {
+            proxy.scrollTo(snapTo, anchor: .leading)
+        }
         return visibleItems[snapTo] != nil && visibleItems[snapTo+N-1] != nil
     }
     
@@ -111,8 +113,7 @@ struct ContentView: View {
                             model.cancelSubscription()
                         }
                         .onChange(of: model.selected) { v in
-                            model.cancelSubscription()
-                            Task.detached {
+                            Task {
                                 while await model.notShowing() {
                                     async let showing = model.doScrollSnap(proxy)
                                     if await showing {
@@ -120,9 +121,7 @@ struct ContentView: View {
                                     }
                                     try? await Task.sleep(nanoseconds: 100000000)
                                 }
-                                // one last snap for edge conditions
                                 await model.doScrollSnap(proxy)
-                                await model.setupSubscription(proxy)
                             }
                         }
                     }

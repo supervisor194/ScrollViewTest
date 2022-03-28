@@ -1,4 +1,7 @@
 # ScrollViewTest
+
+#### Copyright (c) 2022 Solver7 Corporation
+
 SwiftUI ScrollView monitoring content position and adding a 'SnapTo' alignment 
 
 This example was to investigate how to build a <code>ScrollView</code> that 
@@ -19,17 +22,13 @@ self.originPublisher = self.origin
            .dropFirst()
            .eraseToAnyPublisher()
 ```
-The View containing the <code>ScrollView</code> utlizes some async/await code to turn 
-on/off observation (subscription of the preference change events).  This allows us to 
-compute the alignments and issue commands on the <code>@MainActor</code> to perform the
+The View containing the <code>ScrollView</code> utlizes Task with async/await 
+to compute the alignments and keeps commands on the <code>@MainActor</code> to perform the
 <code>proxy.scrollTo(...)</code> and be sure that we have 1) the proper leading item
 and 2) the following N-1 items visible **before** passing control back to the 
-app logic.  It also helps prevent numerous <code>'Bound preference *PreferenceKey tried 
-to update multiple times per frame'</code> though some may occur on long held swiping
-gestures with selects.  In the View: 
+app logic.   In the View: 
 ```
 .onChange(of: model.selected) { v in
-    model.cancelSubscription()
     Task.detached {
         while await model.notShowing() {
             async let showing = model.doScrollSnap(proxy)
@@ -38,7 +37,6 @@ gestures with selects.  In the View:
             }
             try? await Task.sleep(nanoseconds: 100000000)
         }
-        await model.setupSubscription(proxy)
     }
 }
 ```
@@ -64,3 +62,5 @@ func setupSubscription(_ proxy: ScrollViewProxy) {
 Some <code>onAppear</code> and <code>onDisappear</code> are used to activate 
 observation (subscription to preference change events) and to update a 
 <code>model.visibleItems : [Int:Bool]</code>.  
+
+Code at <a href="https://github.com/supervisor194/ScrollViewTest">github</a>
